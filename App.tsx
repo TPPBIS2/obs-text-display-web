@@ -1,4 +1,4 @@
-import {
+src/App.tsximport {
   useEffect,
   useMemo,
   useRef,
