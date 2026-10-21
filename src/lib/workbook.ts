@@ -45,7 +45,7 @@ function splitTeachers(value: string): string[] {
 }
 
 function studentNameColumns(sheet: WorkbookSheet): StudentNameColumn[] {
-  const roomHeader = /^(?:ชั้น(?:เรียน)?|ระดับชั้น|ห้อง|class|room)$/i;
+  const roomHeader = /^(?:ชั้น(?:เรียน)?|ระดับชั้น|ห้อง|ห้องเรียน|class|room)$/i;
 
   for (const row of sheet.rows.slice(0, 20)) {
     const hasRoomHeader = row.some((cell) => roomHeader.test(cleanCell(cell)));
@@ -56,7 +56,7 @@ function studentNameColumns(sheet: WorkbookSheet): StudentNameColumn[] {
       if (/^ชื่อ[-–]?นาม?สกุล$/.test(header)) return [{ index, kind: "full" }];
       if (/นามสกุล|สกุล/.test(header)) return [{ index, kind: "surname" }];
       if (/คำนำหน้า|คำนำ/.test(header)) return [{ index, kind: "prefix" }];
-      if (/ชื่อ/.test(header)) return [{ index, kind: "given" }];
+      if (/^(?:ชื่อ|ชื่อจริง|ชื่อนักเรียน)$/.test(header)) return [{ index, kind: "given" }];
       return [];
     });
 
@@ -93,8 +93,7 @@ export function buildRoomRecords(sheets: WorkbookSheet[]): RoomRecord[] {
       const record = getRecord(room);
 
       if (isTeacherSheet) {
-        const teachers = row
-          .slice(roomIndex + 1)
+        const teachers = (row.slice(roomIndex + 1).length > 0 ? row.slice(roomIndex + 1) : row.slice(0, roomIndex).slice(-1))
           .map(cleanCell)
           .filter(Boolean)
           .flatMap(splitTeachers);
@@ -121,7 +120,7 @@ export function buildRoomRecords(sheets: WorkbookSheet[]): RoomRecord[] {
       const cellsBeforeRoom = row
         .slice(0, roomIndex)
         .map(cleanCell)
-        .filter((cell) => cell && !/^\d+$/.test(cell));
+        .filter((cell) => cell && !/^[0-9๐-๙]+$/.test(cell));
       const studentName = cellsBeforeRoom.at(-1);
       if (studentName) record.students.push(studentName);
     }
