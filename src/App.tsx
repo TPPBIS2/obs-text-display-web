@@ -382,7 +382,7 @@ function App() {
                 className="visually-hidden"
                 type="file"
                 accept=".xlsx,.xls"
-                onChange={(event) => void loadWorkbook(event.target.files?.[0])}
+                onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ""; void loadWorkbook(file); }}
                 aria-label="เลือกไฟล์ Excel"
               />
               <button
